@@ -34,8 +34,7 @@ import java.util.Map;
 import jsqlite.Callback;
 import jsqlite.Constants;
 import jsqlite.Database;
-
-import org.oscim.backend.Log;
+import android.util.Log;
 
 /**
  * Basic communicator with a simple SpatiaLite database.

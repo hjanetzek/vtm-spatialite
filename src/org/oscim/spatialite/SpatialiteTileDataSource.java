@@ -19,7 +19,6 @@ import java.util.Map;
 import jsqlite.Callback;
 import jsqlite.Database;
 
-import org.oscim.backend.Log;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
@@ -30,6 +29,8 @@ import org.oscim.tilesource.ITileDataSink;
 import org.oscim.tilesource.ITileDataSource;
 import org.oscim.tilesource.mapfile.Projection;
 import org.oscim.utils.wkb.WKBReader;
+
+import android.util.Log;
 
 public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Callback {
 	/* private */final static String TAG = SpatialiteTileDataSource.class.getName();

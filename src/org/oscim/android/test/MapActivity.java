@@ -1,11 +1,11 @@
 package org.oscim.android.test;
 
-import org.oscim.android.AndroidMapView;
 import org.oscim.layers.labeling.LabelLayer;
 import org.oscim.layers.tile.vector.MapTileLayer;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.spatialite.SpatialiteTileSource;
 import org.oscim.tilesource.TileSource;
+import org.oscim.view.MapView;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -14,14 +14,14 @@ import android.view.Menu;
 
 public class MapActivity extends org.oscim.android.MapActivity {
 
-	private AndroidMapView mAndroidMapView;
+	private MapView mAndroidMapView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_map);
 
-		mAndroidMapView = (AndroidMapView) findViewById(R.id.mapView);
+		mAndroidMapView = (MapView) findViewById(R.id.mapView);
 
 		//mMap = mMapView.getMap();
 		//TileSource tileSource = new OSciMap2TileSource();

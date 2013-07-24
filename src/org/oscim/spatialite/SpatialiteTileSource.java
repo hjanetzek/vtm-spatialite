@@ -17,12 +17,13 @@ package org.oscim.spatialite;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.oscim.backend.Log;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.tilesource.ITileDataSource;
 import org.oscim.tilesource.MapInfo;
 import org.oscim.tilesource.TileSource;
+
+import android.util.Log;
 
 public class SpatialiteTileSource extends TileSource {
 	private static final String TAG = SpatialiteTileSource.class.getName();

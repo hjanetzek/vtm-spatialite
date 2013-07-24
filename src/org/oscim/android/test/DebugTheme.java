@@ -14,8 +14,6 @@
  */
 package org.oscim.android.test;
 
-import org.oscim.backend.CanvasAdapter;
-import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.theme.IRenderTheme;
@@ -23,6 +21,9 @@ import org.oscim.theme.renderinstruction.Area;
 import org.oscim.theme.renderinstruction.Line;
 import org.oscim.theme.renderinstruction.RenderInstruction;
 import org.oscim.theme.renderinstruction.Text;
+import org.oscim.view.MapView;
+
+import android.graphics.Color;
 
 public class DebugTheme implements IRenderTheme {
 
@@ -44,7 +45,7 @@ public class DebugTheme implements IRenderTheme {
 	};
 
 	public DebugTheme() {
-		scaleTextSize(1 + (CanvasAdapter.dpi / 240 - 1) * 0.5f);
+		scaleTextSize(1 + (MapView.dpi / 240 - 1) * 0.5f);
 	}
 
 	@Override
