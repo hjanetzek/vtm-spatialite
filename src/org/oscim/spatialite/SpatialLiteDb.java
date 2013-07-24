@@ -1,3 +1,25 @@
+/* The MIT License (MIT)
+ *
+ * Copyright (C) 2012 Nutiteq Llc
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package org.oscim.spatialite;
 
 import java.io.File;
@@ -17,7 +39,6 @@ import org.oscim.backend.Log;
 
 /**
  * Basic communicator with a simple SpatiaLite database.
- *
  * @author jaak
  */
 public class SpatialLiteDb {
@@ -140,42 +161,42 @@ public class SpatialLiteDb {
 
 		// from https://www.gaia-gis.it/fossil/libspatialite/wiki?name=switching-to-4.0
 		switch (geomTypeInt % 1000) {
-			case 0:
-				geomType = "GEOMETRY";
-				break;
-			case 1:
-				geomType = "POINT";
-				break;
-			case 2:
-				geomType = "LINESTRING";
-				break;
-			case 3:
-				geomType = "POLYGON";
-				break;
-			case 4:
-				geomType = "MULTIPOINT";
-				break;
-			case 5:
-				geomType = "MULTILINESTRING";
-				break;
-			case 6:
-				geomType = "MULTIPOLYGON";
-				break;
-			case 7:
-				geomType = "GEOMETRYCOLLECTION";
-				break;
+		case 0:
+			geomType = "GEOMETRY";
+			break;
+		case 1:
+			geomType = "POINT";
+			break;
+		case 2:
+			geomType = "LINESTRING";
+			break;
+		case 3:
+			geomType = "POLYGON";
+			break;
+		case 4:
+			geomType = "MULTIPOINT";
+			break;
+		case 5:
+			geomType = "MULTILINESTRING";
+			break;
+		case 6:
+			geomType = "MULTIPOLYGON";
+			break;
+		case 7:
+			geomType = "GEOMETRYCOLLECTION";
+			break;
 		}
 
 		switch (geomTypeInt / 1000) {
-			case 1:
-				geomType += " XYZ";
-				break;
-			case 2:
-				geomType += " XYM";
-				break;
-			case 3:
-				geomType += " XYZM";
-				break;
+		case 1:
+			geomType += " XYZ";
+			break;
+		case 2:
+			geomType += " XYM";
+			break;
+		case 3:
+			geomType += " XYZM";
+			break;
 		}
 
 		return geomType;
