@@ -104,15 +104,13 @@ public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Call
 			public boolean newrow(String[] rowdata) {
 				mElem.tags.clear();
 
+				// add tags
 				for (int i = 2; i < rowdata.length; i++) {
 					if (rowdata[i] == null)
 						continue;
 					//Log.d(TAG, "n: " + rowdata[i]);
 					mElem.tags.add(new Tag(Tag.TAG_KEY_NAME, rowdata[i]));
 				}
-
-				// First column is always row id
-				// userData.put("_id", rowdata[0]);
 
 				// this.process() will be called for each parsed geometry
 				try {
@@ -152,17 +150,16 @@ public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Call
 		}
 
 		String qry = "SELECT rowid, HEX(AsBinary("
+				// simplify with 2px tolerance
 				+ "Simplify("
 				// clip to Tile.SIZE + 4px offset
 				+ "Intersection(GeomFromText('POLYGON((-4 -4, 404 -4, 404 404, -4 404, -4 -4))'),"
-				//+ "Intersection(GeomFromText('POLYGON((2 2, 398 2, 398 398, 2 398, 2 2))'),"
 				// translate to tile coordinates
 				+ "ScaleCoords(ShiftCoords("
-				+ "Transform("
-				+ geomCol + ", 3857)"
+				+ "Transform(" + geomCol + ", 3857)"
 				+ "," + (-sx) + "," + (-sy) + "), " + sw + "," + sh + ")"
 				+ ") "   // end Intersection
-				+ ", 2)" // end Simplify (2 pixel)
+				+ ", 2)" // end Simplify
 				+ "))"  // end HEX
 				+ userColumn
 				+ " FROM \"" + dbLayer.table + "\"";
@@ -204,26 +201,27 @@ public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Call
 		}
 	}
 
-	double scaleFactor = 20037508.342789244;
+	// EPSG:3857 extents
+	private static final double SCALE_3875 = 20037508.342789244;
 
-	private Envelope tileToBBox(Tile tile, int pixel) {
-		long size = Tile.SIZE;
+	private static Envelope tileToBBox(Tile tile, int pixel) {
+		long s = Tile.SIZE;
 
-		double tileX = tile.tileX * size;
-		double tileY = tile.tileY * size;
+		double x = tile.tileX * s;
+		double y = tile.tileY * s;
 
-		double center = (size << tile.zoomLevel) >> 1;
+		double center = (s << tile.zoomLevel) >> 1;
 
-		double minLat = ((center - (tileY + size + pixel)) / center) * scaleFactor;
-		double maxLat = ((center - (tileY - pixel)) / center) * scaleFactor;
+		double minLat = ((center - (y + s + pixel)) / center) * SCALE_3875;
+		double maxLat = ((center - (y - pixel)) / center) * SCALE_3875;
 
-		double minLon = (((tileX - pixel) - center) / center) * scaleFactor;
-		double maxLon = (((tileX + size + pixel) - center) / center) * scaleFactor;
+		double minLon = (((x - pixel) - center) / center) * SCALE_3875;
+		double maxLon = (((x + s + pixel) - center) / center) * SCALE_3875;
 
 		return new Envelope(minLon, maxLon, minLat, maxLat);
 	}
 
 	float pixelAtZoom(int zoomLevel) {
-		return 20037508.342789244f / 256 / (1 << zoomLevel);
+		return (float) (SCALE_3875 / Tile.SIZE / (1 << zoomLevel));
 	}
 }
