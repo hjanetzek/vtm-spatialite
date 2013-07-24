@@ -26,18 +26,21 @@ import org.oscim.theme.renderinstruction.Text;
 
 public class DebugTheme implements IRenderTheme {
 
+	private static final String TAG_KEY_ID = "id";
+
 	private final RenderInstruction[] mText = new RenderInstruction[] {
-	        Text.createText(Tag.TAG_KEY_NAME, 22, 3, Color.BLACK, Color.WHITE, true),
+			Text.createText(Tag.TAG_KEY_NAME, 22, 3, Color.BLACK, Color.WHITE, true),
 	};
 
 	private final RenderInstruction[] mLine = new RenderInstruction[] {
-	        new Line(1, Color.RED, 1)
+			new Line(1000, Color.RED, 1)
 	};
 
 	private final RenderInstruction[] mPoly = new RenderInstruction[] {
 			//new Area(0, 0x88000088),
-	        new Area(0, Color.LTGRAY),
-	        new Line(2, Color.BLUE, 2)
+			//new Area(0, Color.LTGRAY)
+			null,
+			new Line(999, Color.BLUE, 2)
 	};
 
 	public DebugTheme() {
@@ -50,9 +53,18 @@ public class DebugTheme implements IRenderTheme {
 			return mText;
 		else if (element.isLine())
 			return mLine;
-		else if (element.isPoly())
+		else if (element.isPoly()) {
+			if (element.tags.containsKey(TAG_KEY_ID)) {
+				Tag t = element.tags.get(TAG_KEY_ID);
+				int id = Integer.parseInt(t.value);
+				int hash = hashCode(id + 37) % 256;
+				mPoly[0] = new Area(hash, rainBowColor(hash));
+			} else {
+				mPoly[0] = new Area(0, Color.LTGRAY);
+			}
 			return mPoly;
 
+		}
 		return null;
 	}
 
@@ -62,7 +74,9 @@ public class DebugTheme implements IRenderTheme {
 
 	@Override
 	public int getLevels() {
-		return 3;
+		// only required when used with 'MapElement.layer'
+		// to properly separate 'levels'.
+		return 1000;
 	}
 
 	@Override
@@ -77,5 +91,21 @@ public class DebugTheme implements IRenderTheme {
 	@Override
 	public void scaleTextSize(float scaleFactor) {
 		mText[0].scaleTextSize(scaleFactor);
+	}
+
+	// randomize ids
+	private static int hashCode(int a) {
+		a ^= (a << 13);
+		a ^= (a >>> 17);
+		a ^= (a << 5);
+		return a;
+	}
+
+	private static int rainBowColor(float pos) {
+		float i = (255 * 255 / pos);
+		int r = (int) Math.round(Math.sin(0.024 * i + 0) * 127 + 128);
+		int g = (int) Math.round(Math.sin(0.024 * i + 2) * 127 + 128);
+		int b = (int) Math.round(Math.sin(0.024 * i + 4) * 127 + 128);
+		return 0xff000000 | (r << 16) | (g << 8) | b;
 	}
 }

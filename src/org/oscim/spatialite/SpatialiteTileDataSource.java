@@ -36,6 +36,8 @@ public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Call
 	/* private */final MapElement mElem;
 	/* private */final WKBReader mWKBReader;
 
+	static final String KEY_ID = "id";
+
 	private final SpatialLiteDb db;
 	private final Map<String, DBLayer> dbLayers;
 
@@ -104,6 +106,8 @@ public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Call
 			public boolean newrow(String[] rowdata) {
 				mElem.tags.clear();
 
+				mElem.tags.add(new Tag(KEY_ID, rowdata[0]));
+
 				// add tags
 				for (int i = 2; i < rowdata.length; i++) {
 					if (rowdata[i] == null)
@@ -111,6 +115,7 @@ public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Call
 					//Log.d(TAG, "n: " + rowdata[i]);
 					mElem.tags.add(new Tag(Tag.TAG_KEY_NAME, rowdata[i]));
 				}
+				//Log.d(TAG, mElem.tags.asString());
 
 				// this.process() will be called for each parsed geometry
 				try {
@@ -151,6 +156,7 @@ public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Call
 
 		String qry = "SELECT rowid, HEX(AsBinary("
 				// simplify with 2px tolerance
+				// slower but more safe: "SimplifyPreserveTopology("
 				+ "Simplify("
 				// clip to Tile.SIZE + 4px offset
 				+ "Intersection(GeomFromText('POLYGON((-4 -4, 404 -4, 404 404, -4 404, -4 -4))'),"
