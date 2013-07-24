@@ -76,6 +76,6 @@ public class DebugTheme implements IRenderTheme {
 
 	@Override
 	public void scaleTextSize(float scaleFactor) {
+		mText[0].scaleTextSize(scaleFactor);
 	}
-
 }
