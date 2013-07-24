@@ -1,3 +1,17 @@
+/*
+ * Copyright 2013 Hannes Janetzek
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.spatialite;
 
 import java.util.Map;
@@ -19,10 +33,11 @@ import org.oscim.utils.wkb.WKBReader;
 
 public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Callback {
 	/* private */final static String TAG = SpatialiteTileDataSource.class.getName();
-	private final SpatialLiteDb db;
-	private final Map<String, DBLayer> dbLayers;
 	/* private */final MapElement mElem;
 	/* private */final WKBReader mWKBReader;
+
+	private final SpatialLiteDb db;
+	private final Map<String, DBLayer> dbLayers;
 
 	private ITileDataSink mSink;
 
@@ -31,10 +46,16 @@ public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Call
 		this.dbLayers = layers;
 
 		mElem = new MapElement();
+
+		// initialize WKBReader to use MapElement (extends GeometryBuffer) as output.
 		mWKBReader = new WKBReader(mElem, true);
 		mWKBReader.setCallback(this);
 	}
 
+	/**
+	 * @see org.oscim.tilesource.ITileDataSource#executeQuery(MapTile,
+	 *      ITileDataSink)
+	 */
 	@Override
 	public QueryResult executeQuery(MapTile tile, ITileDataSink mapDataSink) {
 		mSink = mapDataSink;
@@ -45,13 +66,28 @@ public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Call
 		return QueryResult.SUCCESS;
 	}
 
+	/**
+	 * @see org.oscim.tilesource.ITileDataSource#destroy()
+	 */
 	@Override
 	public void destroy() {
 		db.close();
 	}
 
-	public void qrySpatiaLiteGeom(DBLayer dbLayer, final Tile tile, int limit) {
+	/**
+	 * Callback from WKBReader.parse()
+	 * @see org.oscim.utils.wkb.WKBReader.Callback#process(GeometryBuffer)
+	 */
+	@Override
+	public void process(GeometryBuffer geom) {
 
+		if (geom.type == GeometryType.NONE)
+			return;
+
+		mSink.process((MapElement) geom);
+	}
+
+	public void qrySpatiaLiteGeom(DBLayer dbLayer, final Tile tile, int limit) {
 
 		Callback cb = new Callback() {
 
@@ -115,41 +151,35 @@ public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Call
 			maxY = Projection.tileYToLatitude(tile.tileY, tile.zoomLevel);
 		}
 
-		String qry;
+		String qry = "SELECT rowid, HEX(AsBinary("
+				+ "Simplify("
+				// clip to Tile.SIZE
+				+ "Intersection(GeomFromText('POLYGON((-2 -2, 402 -2, 402 402, -2 402, -2 -2))'),"
+				//+ "Intersection(GeomFromText('POLYGON((2 2, 398 2, 398 398, 2 398, 2 2))'),"
+				// translate to tile coordinates
+				+ "ScaleCoords(ShiftCoords("
+				+ "Transform("
+				+ geomCol + ", 3857)"
+				+ "," + (-sx) + "," + (-sy) + "), " + sw + "," + sh + ")"
+				+ ") "   // end Intersection
+				+ ", 2)" // end Simplify (2 pixel)
+				+ "))"  // end HEX
+				+ userColumn
+				+ " FROM \"" + dbLayer.table + "\"";
+
 		if (!dbLayer.spatialIndex) {
-			String noIndexWhere = "MBRIntersects(BuildMBR(" + bbox.getMinX()
-					+ "," + bbox.getMinX() + "," + bbox.getMinX() + ","
-					+ bbox.getMaxY() + ")," + dbLayer.geomColumn + ")";
-
-			qry = "SELECT rowid, HEX(AsBinary(" + geomCol + ")) " + userColumn
-					+ " FROM \"" + dbLayer.table + "\""
-					+ " WHERE " + noIndexWhere
-					+ " LIMIT " + limit + ";";
+			qry += " WHERE MBRIntersects(BuildMBR("
+					+ minX + "," + minY + "," + maxX + "," + maxY
+					+ ")," + dbLayer.geomColumn + ")";
 		} else {
-
-			//qry = "SELECT rowid, HEX(AsBinary(" + geomCol + ")) " + userColumn
-			//qry = "SELECT rowid, AsText"
-			qry = "SELECT rowid, HEX(AsBinary("
-					+ "Simplify("
-					// clip to Tile.SIZE
-					+ "Intersection(GeomFromText('POLYGON((-2 -2, 402 -2, 402 402, -2 402, -2 -2))'),"
-					//+ "Intersection(GeomFromText('POLYGON((2 2, 398 2, 398 398, 2 398, 2 2))'),"
-					// translate to tile coordinates
-					+ "ScaleCoords(ShiftCoords("
-					+ "Transform("
-					+ geomCol + ", 3857)"
-					+ "," + (-sx) + "," + (-sy) + "), " + sw + "," + sh + ")"
-					+ ") "   // end Intersection
-					+ ", 2)" // end Simplify (2 pixel)
-					+ "))"  // end HEX
-					+ userColumn
-					+ " FROM \"" + dbLayer.table
-					+ "\" WHERE ROWID IN (select pkid from idx_"
+			qry += " WHERE ROWID IN (select pkid from idx_"
 					+ dbLayer.table + "_" + dbLayer.geomColumn
 					+ " WHERE pkid MATCH RtreeIntersects("
 					+ minX + "," + minY + "," + maxX + "," + maxY
-					+ ")) LIMIT " + limit;
+					+ "))";
 		}
+
+		qry += " LIMIT " + limit;
 
 		//Log.d(TAG, qry);
 		long time = 0;
@@ -169,8 +199,8 @@ public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Call
 		}
 
 		time = System.currentTimeMillis() - time;
-		if (time > 1) {
-			Log.d(TAG, tile + " took: " + time + " wait: " + wait + " (" + dbLayer.table +")");
+		if (time > 10) {
+			Log.d(TAG, tile + " took: " + time + " wait: " + wait + " (" + dbLayer.table + ")");
 		}
 	}
 
@@ -196,13 +226,4 @@ public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Call
 	float pixelAtZoom(int zoomLevel) {
 		return 20037508.342789244f / 256 / (1 << zoomLevel);
 	}
-
-	@Override
-	public void process(GeometryBuffer geom) {
-		if (geom.type == GeometryType.NONE)
-			return;
-
-		mSink.process(mElem);
-	}
-
 }
