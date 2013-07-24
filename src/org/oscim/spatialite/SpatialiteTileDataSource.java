@@ -153,8 +153,8 @@ public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Call
 
 		String qry = "SELECT rowid, HEX(AsBinary("
 				+ "Simplify("
-				// clip to Tile.SIZE
-				+ "Intersection(GeomFromText('POLYGON((-2 -2, 402 -2, 402 402, -2 402, -2 -2))'),"
+				// clip to Tile.SIZE + 4px offset
+				+ "Intersection(GeomFromText('POLYGON((-4 -4, 404 -4, 404 404, -4 404, -4 -4))'),"
 				//+ "Intersection(GeomFromText('POLYGON((2 2, 398 2, 398 398, 2 398, 2 2))'),"
 				// translate to tile coordinates
 				+ "ScaleCoords(ShiftCoords("
