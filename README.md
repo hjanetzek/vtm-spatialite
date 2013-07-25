@@ -3,7 +3,7 @@ Experimental TileSource for spatialite.
 Download http://city.informatik.uni-bremen.de/~jeff/ne.sqlite to /sdcard/ for testing.
 A pre-compiled apk is available at http://city.informatik.uni-bremen.de/~jeff/vtm-spatialite-android.apk
 
-The master branch works with hjanetzek/vtm-android:master. release_0_5 branch matches vtm-android:release_0_5
+The master branch works with hjanetzek/vtm:master. release_0_5 branches are compatible with opensciencemap/vtm-android:master
 
 DIY:
 The Database should only contain geometries in EPSG:3857 projection, 4326 should work though.
