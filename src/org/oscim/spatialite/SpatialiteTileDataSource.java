@@ -34,6 +34,9 @@ import android.util.Log;
 
 public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Callback {
 	/* private */final static String TAG = SpatialiteTileDataSource.class.getName();
+
+	/* private */final static boolean DEBUG = true;
+
 	/* private */final MapElement mElem;
 	/* private */final WKBReader mWKBReader;
 
@@ -64,7 +67,11 @@ public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Call
 		mSink = mapDataSink;
 
 		for (String layerKey : dbLayers.keySet()) {
-			qrySpatiaLiteGeom(dbLayers.get(layerKey), tile, 500);
+			if (layerKey.startsWith("ln_highway")
+					|| (tile.zoomLevel > 16 && layerKey.startsWith("pt_amenity"))
+					|| (tile.zoomLevel > 14 && layerKey.startsWith("pg_amenity"))
+					|| (tile.zoomLevel > 15 && layerKey.startsWith("pg_building")))
+				qrySpatiaLiteGeom(dbLayers.get(layerKey), tile, 500);
 		}
 		return QueryResult.SUCCESS;
 	}

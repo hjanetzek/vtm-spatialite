@@ -1,5 +1,6 @@
 package org.oscim.android.test;
 
+import org.oscim.core.MapPosition;
 import org.oscim.layers.labeling.LabelLayer;
 import org.oscim.layers.tile.vector.MapTileLayer;
 import org.oscim.renderer.GLRenderer;
@@ -14,14 +15,13 @@ import android.view.Menu;
 
 public class MapActivity extends org.oscim.android.MapActivity {
 
-	private MapView mAndroidMapView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_map);
 
-		mAndroidMapView = (MapView) findViewById(R.id.mapView);
+		mMapView = (MapView) findViewById(R.id.mapView);
 
 		//mMap = mMapView.getMap();
 		//TileSource tileSource = new OSciMap2TileSource();
@@ -46,7 +46,8 @@ public class MapActivity extends org.oscim.android.MapActivity {
 		MapTileLayer layer = new MapTileLayer(mMapView);
 
 		String path = Environment.getExternalStorageDirectory().getPath();
-		TileSource tileSource = new SpatialiteTileSource(path + "/ne.sqlite");
+		//TileSource tileSource = new SpatialiteTileSource(path + "/ne.sqlite");
+		TileSource tileSource = new SpatialiteTileSource(path + "/bremen-map.sqlite");
 
 		layer.setTileSource(tileSource);
 		layer.setRenderTheme(new DebugTheme());
@@ -54,8 +55,13 @@ public class MapActivity extends org.oscim.android.MapActivity {
 		mMapView.getLayerManager().add(layer);
 		mMapView.getLayerManager().add(new LabelLayer(mMapView, layer.getTileLayer()));
 
-		mAndroidMapView.setClickable(true);
-		mAndroidMapView.setFocusable(true);
+		MapPosition p = new MapPosition();
+		p.setPosition(53.08, 8.81);
+		p.setZoomLevel(15);
+		mMapView.setMapPosition(p);
+
+		mMapView.setClickable(true);
+		mMapView.setFocusable(true);
 	}
 
 	@Override
