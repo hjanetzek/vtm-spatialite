@@ -5,6 +5,8 @@ import org.oscim.layers.labeling.LabelLayer;
 import org.oscim.layers.tile.vector.MapTileLayer;
 import org.oscim.renderer.GLRenderer;
 import org.oscim.spatialite.SpatialiteTileSource;
+import org.oscim.theme.InternalRenderTheme;
+import org.oscim.theme.ThemeLoader;
 import org.oscim.tilesource.TileSource;
 import org.oscim.view.MapView;
 
@@ -50,7 +52,8 @@ public class MapActivity extends org.oscim.android.MapActivity {
 		TileSource tileSource = new SpatialiteTileSource(path + "/bremen-map.sqlite");
 
 		layer.setTileSource(tileSource);
-		layer.setRenderTheme(new DebugTheme());
+		//layer.setRenderTheme(new DebugTheme());
+		layer.setRenderTheme(ThemeLoader.load(InternalRenderTheme.DEFAULT));
 
 		mMapView.getLayerManager().add(layer);
 		mMapView.getLayerManager().add(new LabelLayer(mMapView, layer.getTileLayer()));

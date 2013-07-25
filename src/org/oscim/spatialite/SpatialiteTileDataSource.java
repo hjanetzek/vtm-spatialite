@@ -67,11 +67,16 @@ public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Call
 		mSink = mapDataSink;
 
 		for (String layerKey : dbLayers.keySet()) {
-			if (layerKey.startsWith("ln_highway")
-					|| (tile.zoomLevel > 16 && layerKey.startsWith("pt_amenity"))
-					|| (tile.zoomLevel > 14 && layerKey.startsWith("pg_amenity"))
-					|| (tile.zoomLevel > 15 && layerKey.startsWith("pg_building")))
-				qrySpatiaLiteGeom(dbLayers.get(layerKey), tile, 500);
+			DBLayer l = dbLayers.get(layerKey);
+
+			if (l.table.equals("ln_highway")
+					|| (tile.zoomLevel > 16 && l.table.equals("pt_amenity"))
+					|| (tile.zoomLevel > 14 && l.table.equals("pg_amenity"))
+					|| (tile.zoomLevel > 13 && l.table.equals("pg_natural"))
+					|| (tile.zoomLevel > 13 && l.table.equals("pg_waterway"))
+					|| (tile.zoomLevel > 13 && l.table.equals("pg_leisure"))
+					|| (tile.zoomLevel > 15 && l.table.equals("pg_building")))
+				qrySpatiaLiteGeom(l, tile, "sub_type", 500);
 		}
 		return QueryResult.SUCCESS;
 	}
@@ -97,7 +102,7 @@ public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Call
 		mSink.process((MapElement) geom);
 	}
 
-	public void qrySpatiaLiteGeom(DBLayer dbLayer, final Tile tile, int limit) {
+	public void qrySpatiaLiteGeom(final DBLayer dbLayer, final Tile tile, String userColumn, int limit) {
 
 		Callback cb = new Callback() {
 
@@ -116,13 +121,19 @@ public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Call
 
 				mElem.tags.add(new Tag(KEY_ID, rowdata[0]));
 
+				if (rowdata[2] != null)
+					mElem.tags.add(new Tag(dbLayer.table.substring(3), rowdata[2]));
+
+				if (rowdata[3] != null)
+					mElem.tags.add(new Tag(Tag.TAG_KEY_NAME, rowdata[3]));
+
 				// add tags
-				for (int i = 2; i < rowdata.length; i++) {
-					if (rowdata[i] == null)
-						continue;
-					//Log.d(TAG, "n: " + rowdata[i]);
-					mElem.tags.add(new Tag(Tag.TAG_KEY_NAME, rowdata[i]));
-				}
+//				for (int i = 2; i < rowdata.length; i++) {
+//					if (rowdata[i] == null)
+//						continue;
+//
+//					//Log.d(TAG, "n: " + rowdata[i]);
+//				}
 				//Log.d(TAG, mElem.tags.asString());
 
 				// this.process() will be called for each parsed geometry
@@ -136,10 +147,12 @@ public class SpatialiteTileDataSource implements ITileDataSource, WKBReader.Call
 			}
 		};
 
-		String userColumn = "";
+		if (userColumn == null)
+			userColumn = "";
+		else userColumn = " ," + userColumn;
 
 		if (dbLayer.hasName) {
-			userColumn = ", name";
+			userColumn += ", name";
 		}
 
 		String geomCol = dbLayer.geomColumn;
