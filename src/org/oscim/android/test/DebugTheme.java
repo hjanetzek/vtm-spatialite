@@ -94,7 +94,8 @@ public class DebugTheme implements IRenderTheme {
 		mText[0].scaleTextSize(scaleFactor);
 	}
 
-	// randomize ids
+	// from http://stackoverflow.com/questions/6082915/
+	// a-good-hash-function-to-use-in-interviews-for-integer-numbers-strings
 	private static int hashCode(int a) {
 		a ^= (a << 13);
 		a ^= (a >>> 17);
@@ -102,6 +103,7 @@ public class DebugTheme implements IRenderTheme {
 		return a;
 	}
 
+	// from http://krazydad.com/tutorials/makecolors.php
 	private static int rainBowColor(float pos) {
 		float i = (255 * 255 / pos);
 		int r = (int) Math.round(Math.sin(0.024 * i + 0) * 127 + 128);
