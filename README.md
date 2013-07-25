@@ -1,6 +1,6 @@
 Experimental TileSource for spatialite. 
 
-Download http://city.informatik.uni-bremen.de/~jeff/ne.sqlite to /sdcard/ for testing.
+Download http://city.informatik.uni-bremen.de/~jeff/{ne.sqlite,bremen-map.sqlite} to /sdcard/ for testing.
 A pre-compiled apk is available at http://city.informatik.uni-bremen.de/~jeff/vtm-spatialite-android.apk
 
 The master branch works with hjanetzek/vtm-android:master. release_0_5 branch matches vtm-android:release_0_5
